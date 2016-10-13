@@ -40,6 +40,14 @@ function WatsonUtils(app,config) {
         internalThis.settingsStore.requestPhoto()
     });
 
+    app.get("/setAlive/:isAlive", function(req,res) {
+        res.end(internalThis.settingsStore.setAlive(req.params.isAlive))
+    });
+
+    app.get("/setBreathing/:isBreathing", function(req,res) {
+        res.end(internalThis.settingsStore.setBreathing(isBreathing))
+    });
+
     app.get("/photo/:photoId", function(req,res) {
         res.end(internalThis.photoStore.getPhotoData())
     });
@@ -47,6 +55,11 @@ function WatsonUtils(app,config) {
     app.get("/photoInfo", function(req,res) {
         var info = internalThis.photoStore.getPhotoInfo()
         res.status(200).json(JSON.stringify(info))
+    });
+
+    app.get("/robotSettings", function(req,res) {
+        var settings = internalThis.settingsStore.getSettings()
+        res.status(200).json(JSON.stringify(settings))
     });
 
     // Multer file upload
@@ -85,10 +98,16 @@ WatsonUtils.prototype.analyzePhoto = function(photoFilePath) {
         .then(function(classifyJson) {
             internalThis.vrUtils.detectFaces(photoFilePath)
                 .then(function(facesJson) {
-                    var vr_results = {}
-                    vr_results.classify = classifyJson
-                    vr_results.detect_faces = facesJson
-                    deferred.resolve(vr_results );
+                    internalThis.vrUtils.findSimilarImages(photoFilePath)
+                        .then(function(similarImagesJson) {
+                            var vr_results = {}
+                            vr_results.classify = classifyJson
+                            vr_results.detect_faces = facesJson
+                            vr_results.similar_images = similarImagesJson
+                            deferred.resolve(vr_results );
+                        }, function(err) {
+                            deferred.reject(err);
+                        });
                 }, function(err) {
                     deferred.reject(err);
                 });

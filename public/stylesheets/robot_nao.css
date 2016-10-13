@@ -30,10 +30,8 @@ body div {
     z-index:100;
     height: 60px;
 }
-#bottom_locked_button {
-    color: #fff;
+#requestPhotoButton {
     font-size: 20px;
-    background-color: #311941;
     border-width: 0px;
     position:fixed;
     bottom:0;
@@ -41,6 +39,12 @@ body div {
     padding:5px;
     z-index:100;
     height: 60px;
+}
+#request_photo_button_enabled {
+    color: #fff;
+}
+#request_photo_button_disabled {
+    color: #8d8d8d;
 }
 #heading {
     color: #fff;
@@ -69,7 +73,7 @@ body div {
     font-weight: normal;
 }
 .photo {
-    width: 500px;
+    height: 300px;
     margin-right: 20px;
 }
 .photo_wrapper {
@@ -129,6 +133,28 @@ body div {
 }
 .analysis_result_confidence {
     float: right;
+}
+.similar_image_result {
+    background-color: #264a60;
+    font-size: 12px;
+    margin-top:5px;
+    margin-right:10px;
+    margin-bottom:5px;
+    padding: 5px 10px;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    border-radius: 20px; /* future proofing */
+    -khtml-border-radius: 20px;
+    float:left;
+}
+.similar_image_result_image {
+    width: 100px;
+    margin: 10px 10px;
+    float: left;
+}
+.similar_image_result_confidence {
+    float: right;
+    margin-top: 10px;
 }
 /***  Common CSS ***/
 button:focus {

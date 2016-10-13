@@ -2,6 +2,7 @@
 var PhotoUtils = {};
 
 var analysis_result_counter = 0
+var similar_result_counter = 0
 
 PhotoUtils.App = function() {
 
@@ -15,7 +16,8 @@ PhotoUtils.App = function() {
                 if (res.length > 0) {
                     var photoJson = JSON.parse(res)
                     // Only refresh is new photo available
-                    if (photoJson.photo_taken_time != -1 && "img_" + photoJson.photo_taken_time != $(".photo").attr('id')) {
+                    var imageId = "img_" + photoJson.photo_taken_time
+                    if (photoJson.photo_taken_time != -1 && $(imageId).length == 0) {
                         $('#main_wrapper').empty()
                         // Clone the analysis template from the .jade file
                         var template = $("#analysis_template").clone()
@@ -42,6 +44,9 @@ PhotoUtils.App = function() {
         var img = template.find('.photo')
         img.attr("src", "photo/" + photoJson.photo_taken_time);
         img.attr("id", "img_" + photoJson.photo_taken_time); // used by showFacesRegion()
+
+        var img = template.find('.photo_wrapper')
+        img.attr("id", "photo_wrapper_" + photoJson.photo_taken_time); // used by showFacesRegion()
     }
 
     function getFacesDetected(facesResults) {
@@ -83,21 +88,21 @@ PhotoUtils.App = function() {
                 }
             }
 
-            addAnalysisResults(faceResults,results);
+            showAnalysisResults(faceResults,results);
 
             // Update image once loaded
-            var imgId = "#img_" + photoJson.photo_taken_time
-            $(imgId).load(function() {
-                showFacesRegion(imgId,faces,analysisHtml)
+            $("#img_" + photoJson.photo_taken_time).load(function() {
+                showFacesRegion(photoJson.photo_taken_time,faces,analysisHtml)
             });
         }
     }
 
     // Show face selection on top of photo
-    function showFacesRegion(imgId,faces,analysisHtml) {
+    function showFacesRegion(photoId,faces,analysisHtml) {
 
         // Need to do this to get <img> that is unscaled so we can have the real/unscaled width
         //  Oddly HTML5's img.naturalWidth wasn't working for me
+        var imgId = "#img_" + photoId
         $("<img/>") // Make in memory copy of image to avoid css issues
             .attr("src", $(imgId).attr("src"))
             .load(function() {
@@ -112,13 +117,13 @@ PhotoUtils.App = function() {
                         faceRegion.css('top', (face.face_location.top*imageReduction) + "px");
                         faceRegion.css('height', (face.face_location.height*imageReduction) + "px");
                         faceRegion.css('width', (face.face_location.width*imageReduction) + "px");
-                        $(".photo_wrapper").append(faceRegion)
+                        $("#photo_wrapper_" + photoId).append(faceRegion)
                     }
                 }
             });
     }
 
-    function getClassesDetected(classifyResults) {
+    function getClassesFound(classifyResults) {
         var classes = null
         if (classifyResults.images.length > 0 && classifyResults.images[0].classifiers.length > 0
             && classifyResults.images[0].classifiers[0].classes.length > 0) {
@@ -130,7 +135,7 @@ PhotoUtils.App = function() {
     function updateClassifierHtml(photoJson,analysisHtml) {
 
         var classifyResults = photoJson.vr_results.classify
-        var classes = getClassesDetected(classifyResults)
+        var classes = getClassesFound(classifyResults)
         if (classes) {
             var classifierResults = analysisHtml.find('.classifier_results')
 
@@ -141,7 +146,7 @@ PhotoUtils.App = function() {
                 result.confidence = Number(classes[i].score).toFixed(2)
                 results.push(result)
             }
-            addAnalysisResults(classifierResults, results);
+            showAnalysisResults(classifierResults, results);
         }
     }
 
@@ -158,22 +163,56 @@ PhotoUtils.App = function() {
         result.confidence = 0.55
         results[1] = result
 
-        addAnalysisResults(pokerResults,results)
+        showAnalysisResults(pokerResults,results)
+    }
+
+    function getSimilarImages(similarImageResults) {
+        var similars = null
+        if (similarImageResults.similarImageResults.length > 0 && similarImageResults.images[0].classifiers.length > 0
+            && similarImageResults.images[0].classifiers[0].classes.length > 0) {
+            similars = similarImageResults.images[0].classifiers[0].classes
+        }
+        return similars
     }
 
     function updateSimilarImagesHtml(photoJson,analysisHtml) {
-        var similarImages = analysisHtml.find('.similar_images')
+        var similars = photoJson.vr_results.similar_images.similar_images
+        if (similars && similars.length > 0) {
+            var similarImagesDiv = analysisHtml.find('.similar_images')
+
+            var results = []
+            for (var i in similars) {
+                result = {}
+                result.link = similars[i].metadata.image_link
+                result.category = similars[i].metadata.category
+                result.product_type = similars[i].metadata.product_type
+                result.confidence = Number(similars[i].score).toFixed(2)
+                results.push(result)
+            }
+            showSimilarImageResults(similarImagesDiv, results);
+        }
     }
 
-    function addAnalysisResults(parent,results) {
+    function showSimilarImageResults(parent,results) {
 
         var div = $('<div>')
         parent.append(div);
 
         var counter = 0
         for (var i in results) {
-            var resultHtml = getAnalysisResultHtml(results[i].description,results[i].confidence)
-            div.append(resultHtml);
+            similar_result_counter+=1
+            var template = $("#similar_image_result").clone()
+            template.attr("id", "similar_image_result_" + similar_result_counter)
+            template.removeClass("hidden")
+
+            var image_div = template.find('#similar_image_result_image')
+            image_div.attr("id", "similar_image_result_image" + similar_result_counter)
+            image_div.attr("src", results[i].link);
+            var confidence_div = template.find('#similar_image_result_confidence')
+            confidence_div.attr("id", "similar_image_result_confidence_" + similar_result_counter)
+            confidence_div.html(results[i].confidence)
+
+            div.append(template);
             counter+=1
             if (counter % 4 == 0 || counter == results.length) {
                 $('<div>', { 'class': 'clearBoth' }).appendTo(div);
@@ -181,37 +220,67 @@ PhotoUtils.App = function() {
         }
     }
 
-    function getAnalysisResultHtml(description,confidence) {
+    function showAnalysisResults(parent,results) {
 
-        analysis_result_counter+=1
-        var template = $("#analysis_result").clone()
-        template.attr("id", "analysis_result_" + analysis_result_counter)
-        template.removeClass("hidden")
+        var div = $('<div>')
+        parent.append(div);
 
-        var description_div = template.find('#analysis_result_description')
-        template.attr("id", "analysis_result_description_" + analysis_result_counter)
-        description_div.html(description)
-        var confidence_div = template.find('#analysis_result_confidence')
-        template.attr("id", "analysis_result_confidence_" + analysis_result_counter)
-        confidence_div.html(confidence)
+        var counter = 0
+        for (var i in results) {
+            analysis_result_counter+=1
+            var template = $("#analysis_result").clone()
+            template.attr("id", "analysis_result_" + analysis_result_counter)
+            template.removeClass("hidden")
 
-        return template;
+            var description_div = template.find('#analysis_result_description')
+            description_div.attr("id", "analysis_result_description_" + analysis_result_counter)
+            description_div.html(results[i].description)
+            var confidence_div = template.find('#analysis_result_confidence')
+            confidence_div.attr("id", "analysis_result_confidence_" + analysis_result_counter)
+            confidence_div.html(results[i].confidence)
+
+            div.append(template);
+            counter+=1
+            if (counter % 4 == 0 || counter == results.length) {
+                $('<div>', { 'class': 'clearBoth' }).appendTo(div);
+            }
+        }
+    }
+
+    function setTakePhotoButtonEnabled(isEnabled) {
+        $("#requestPhotoButton").disabled = !isEnabled
+
+        if ($("#requestPhotoButton").disabled) {
+            template.removeClass("request_photo_button_enabled")
+            template.addClass("request_photo_button_disabled")
+        }else  {
+            template.addClass("request_photo_button_enabled")
+            template.removeClass("request_photo_button_disabled")
+        }
     }
 
     // Initialize the application
     var init = function() {
 
-        $("#takePhotoButton").click(function(){
+        $("#requestPhotoButton").click(function(){
             $.ajax({
                 type: 'GET',
                 url: '/takePhoto',
                 success: function (res, msg) {
-                    // Do nothing for now
+                    // Prevent multiple clicks
+                    setTakePhotoButtonEnabled(false)
+                    setTimeout(function() {
+                        setTakePhotoButtonEnabled(true)
+                    }, 5000);
                 },
                 error: function (res, msg, err) {
                     alert("Error communicating with server");
                 }
             });
+        });
+
+        $("#settings_image").click(function(){
+            window.location = location.href + "settings"
         });
 
         refreshPhotos()

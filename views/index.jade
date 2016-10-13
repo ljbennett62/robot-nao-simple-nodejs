@@ -14,9 +14,9 @@ html
         div#main_wrapper
             div.no_photo No Photo Available
 
-    button#bottom_locked_button Try Again
+        button#requestPhotoButton Request a photo
 
-        <!-- Template for reuse when adding new analyses -->
+        <!-- Reusable template for adding new photo analysis -->
         div#analysis_template.analysis_wrapper.hidden
             div.photo_wrapper
                 img.photo
@@ -26,13 +26,19 @@ html
                     div.poker_results
                 div.classifier_heading Classifier
                     div.classifier_results
-            div.similar_images_heading Similar Images
+            div.similar_images_heading Similar Products
                 div.similar_images
 
-        <!-- Template for reuse when displaying results -->
+        <!-- Reusable template for displaying classifier results -->
         div#analysis_result.analysis_result.hidden
             div#analysis_result_description.analysis_result_description
             div#analysis_result_confidence.analysis_result_confidence
+            div.clearBoth
+
+        <!-- Reusable template for displaying similar image results -->
+        div#similar_image_result.similar_image_result.hidden
+            img#similar_image_result_image.similar_image_result_image
+            div#similar_image_result_confidence.similar_image_result_confidence
             div.clearBoth
 
     script(src="javascript/jquery/jquery-2.1.0.min.js" type="text/javascript")<!-- jQuery-- >

@@ -27,5 +27,13 @@ RobotNaoSettings.prototype.requestPhoto = function() {
     this.settings.photo_status.photo_requested = new Date().getTime()
 }
 
+RobotNaoSettings.prototype.setAlive = function(isAlive) {
+    this.settings.photo_status.is_alive = isAlive
+}
+
+RobotNaoSettings.prototype.setBreathing = function(isBreathing) {
+    this.settings.photo_status.photo_requested = isBreathing
+}
+
 // Exported class
 module.exports = RobotNaoSettings;
