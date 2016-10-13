@@ -30,22 +30,6 @@ body div {
     z-index:100;
     height: 60px;
 }
-#requestPhotoButton {
-    font-size: 20px;
-    border-width: 0px;
-    position:fixed;
-    bottom:0;
-    width:100%;
-    padding:5px;
-    z-index:100;
-    height: 60px;
-}
-#request_photo_button_enabled {
-    color: #fff;
-}
-#request_photo_button_disabled {
-    color: #8d8d8d;
-}
 #heading {
     color: #fff;
     margin-left: 10px;
@@ -156,6 +140,20 @@ body div {
     float: right;
     margin-top: 10px;
 }
+#requestPhotoButton {
+    background-color: #311941;
+    font-size: 20px;
+    border-width: 0px;
+    position:fixed;
+    bottom:0;
+    width:100%;
+    padding:5px;
+    z-index:100;
+    height: 60px;
+}
+#request_photo_button_enabled {
+    color: #fff;
+}
 /***  Common CSS ***/
 button:focus {
     outline:0;
@@ -172,4 +170,47 @@ a:link, a:visited {
 }
 .clearBoth {
     clear:both;
+}
+
+/***  Common CSS ***/
+#request_photo_button_loading {
+    margin: 5px auto;
+    font-size: 4px;
+    position: relative;
+    text-indent: -9999em;
+    border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+    border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+    border-left: 1.1em solid #ffffff;
+    -webkit-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-animation: load8 1.1s infinite linear;
+    animation: load8 1.1s infinite linear;
+}
+#request_photo_button_loading,
+#request_photo_button_loading:after {
+    border-radius: 50%;
+    width: 10em;
+    height: 10em;
+}
+@-webkit-keyframes load8 {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+@keyframes load8 {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }

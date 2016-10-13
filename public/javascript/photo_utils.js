@@ -248,14 +248,17 @@ PhotoUtils.App = function() {
     }
 
     function setTakePhotoButtonEnabled(isEnabled) {
-        $("#requestPhotoButton").disabled = !isEnabled
+        button = $("#requestPhotoButton")
+        button.disabled = !isEnabled
 
-        if ($("#requestPhotoButton").disabled) {
-            template.removeClass("request_photo_button_enabled")
-            template.addClass("request_photo_button_disabled")
+        enabled_div = $("#request_photo_button_enabled")
+        loading_div = $("#request_photo_button_loading")
+        if (button.disabled) {
+            loading_div.show()
+            enabled_div.hide()
         }else  {
-            template.addClass("request_photo_button_enabled")
-            template.removeClass("request_photo_button_disabled")
+            enabled_div.show()
+            loading_div.hide()
         }
     }
 
@@ -263,15 +266,16 @@ PhotoUtils.App = function() {
     var init = function() {
 
         $("#requestPhotoButton").click(function(){
+            // Prevent multiple clicks
+            setTakePhotoButtonEnabled(false)
+            setTimeout(function() {
+                setTakePhotoButtonEnabled(true)
+            }, 5000);
             $.ajax({
                 type: 'GET',
                 url: '/takePhoto',
                 success: function (res, msg) {
-                    // Prevent multiple clicks
-                    setTakePhotoButtonEnabled(false)
-                    setTimeout(function() {
-                        setTakePhotoButtonEnabled(true)
-                    }, 5000);
+                    // Nothing to do for now
                 },
                 error: function (res, msg, err) {
                     alert("Error communicating with server");

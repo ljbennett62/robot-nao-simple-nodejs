@@ -38,6 +38,7 @@ function WatsonUtils(app,config) {
     // Ask robot to take a photo
     app.get("/takePhoto", function(req,res) {
         internalThis.settingsStore.requestPhoto()
+        res.status(200).json("Photo requested")
     });
 
     app.get("/setAlive/:isAlive", function(req,res) {
