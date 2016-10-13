@@ -290,7 +290,7 @@ PhotoUtils.App = function() {
         refreshPhotos()
         window.setInterval(function(){
             refreshPhotos()
-        }, 5000);
+        }, 20000);
 
     };
 
